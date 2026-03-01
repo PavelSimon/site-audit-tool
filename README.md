@@ -1,6 +1,8 @@
 # Site Audit Tool
 
-Kompletný automatizovaný audit webu: Performance, SEO, Accessibility, Security a GDPR Compliance.
+Komplexný automatizovaný audit webu: Performance, SEO, Accessibility, Security a GDPR Compliance.
+
+Použitie bez záruky kompletnosti a bez akejkoľvek zodpovednosti autora. Nevyužíva žiadne nelegálne nástroje, takže je (asi) v pohode ho použiť na akúkoľvek stránku. Ja som si auditoval lken svoje...
 
 Funguje ako **web aplikácia** — zadáte URL, audit beží na pozadí, výsledky sa zobrazia v prehliadači a dajú sa exportovať ako `.md` alebo `.pdf`.
 
