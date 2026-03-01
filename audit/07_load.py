@@ -13,7 +13,6 @@ import json
 import subprocess
 import sys
 import tempfile
-import textwrap
 import time
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
@@ -62,28 +61,25 @@ def discover_load_pages(target_url: str) -> list[tuple[str, str]]:
 
 
 def build_locust_file(target_url: str, pages: list[tuple[str, str]]) -> str:
-    task_lines = []
+    task_blocks = []
     for i, (path, label) in enumerate(pages):
         weight = 3 if i == 0 else 1
         safe_name = label.replace("/", "_").replace(" ", "_").strip("_") or f"page_{i}"
-        task_lines.append(textwrap.dedent(f"""\
-            @task({weight})
-            def {safe_name}(self):
-                self.client.get("{path}", headers=self.headers, name="{label}")
-        """))
+        task_blocks.append(
+            f"    @task({weight})\n"
+            f"    def {safe_name}(self):\n"
+            f"        self.client.get({path!r}, headers=self.headers, name={label!r})\n"
+        )
 
-    tasks_str = "\n    ".join("\n    ".join(t.splitlines()) for t in task_lines)
-
-    return textwrap.dedent(f"""\
-        from locust import HttpUser, task, between
-
-        class AuditUser(HttpUser):
-            wait_time = between(1, 3)
-            host = "{target_url}"
-            headers = {{"User-Agent": "{USER_AGENT}"}}
-
-            {tasks_str}
-    """)
+    tasks_block = "\n".join(task_blocks)
+    return (
+        "from locust import HttpUser, task, between\n\n"
+        "class AuditUser(HttpUser):\n"
+        f"    wait_time = between(1, 3)\n"
+        f"    host = {target_url!r}\n"
+        f"    headers = {{\"User-Agent\": {USER_AGENT!r}}}\n\n"
+        f"{tasks_block}"
+    )
 
 
 def parse_locust_csv(stats_file: Path) -> list[dict]:
