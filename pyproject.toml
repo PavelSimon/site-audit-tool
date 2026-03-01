@@ -1,0 +1,27 @@
+[project]
+name = "site-audit-tool"
+version = "1.0.0"
+description = "Kompletný audit webu: Performance, SEO, Accessibility, Security, GDPR & Compliance"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "beautifulsoup4>=4.14.3",
+    "dnspython>=2.8.0",
+    "fastapi>=0.115.0",
+    "httpx>=0.28.1",
+    "jinja2>=3.1.4",
+    "locust>=2.43.3",
+    "lxml>=6.0.2",
+    "markdown2>=2.5.0",
+    "playwright>=1.58.0",
+    "python-multipart>=0.0.20",
+    "rich>=14.3.3",
+    "sslyze>=6.3.0",
+    "uvicorn[standard]>=0.34.0",
+]
+
+[project.scripts]
+audit-web = "web.app:app"
+
+[tool.uv]
+dev-dependencies = []

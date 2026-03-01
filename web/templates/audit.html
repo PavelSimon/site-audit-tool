@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Audit — {{ target_url }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔍 Site Audit Tool</h1>
+      <a href="/" class="back-link">← Nový audit</a>
+    </header>
+
+    <main>
+      <div class="audit-status-card">
+        <h2>Audit: <code>{{ target_url }}</code></h2>
+
+        <div id="progress-container">
+          <div class="spinner" id="spinner"></div>
+          <ul id="progress-log" class="progress-log"></ul>
+        </div>
+
+        <div id="done-actions" style="display:none;" class="done-actions">
+          <p class="success-msg">✅ Audit dokončený!</p>
+          <div class="action-buttons">
+            <a href="/audit/{{ job_id }}/report" class="btn-primary">📄 Zobraziť report</a>
+            <a href="/audit/{{ job_id }}/download/md" class="btn-secondary">⬇ Stiahnuť .md</a>
+            <a href="/audit/{{ job_id }}/download/pdf" class="btn-secondary">⬇ Stiahnuť .pdf</a>
+          </div>
+        </div>
+
+        <div id="error-section" style="display:none;" class="error-banner">
+          <p>❌ Nastala chyba počas auditu. Skúste znova.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const jobId = "{{ job_id }}";
+    const progressLog = document.getElementById("progress-log");
+    const spinner = document.getElementById("spinner");
+    const doneActions = document.getElementById("done-actions");
+    const errorSection = document.getElementById("error-section");
+
+    const evtSource = new EventSource(`/audit/${jobId}/progress`);
+
+    evtSource.onmessage = function(event) {
+      const msg = event.data.trim();
+
+      if (msg === "DONE") {
+        evtSource.close();
+        spinner.style.display = "none";
+        doneActions.style.display = "block";
+        return;
+      }
+
+      if (msg.startsWith("[ERROR]")) {
+        const li = document.createElement("li");
+        li.className = "log-error";
+        li.textContent = msg;
+        progressLog.appendChild(li);
+        return;
+      }
+
+      const li = document.createElement("li");
+      li.className = "log-item";
+      li.textContent = msg;
+      progressLog.appendChild(li);
+      li.scrollIntoView({ behavior: "smooth" });
+    };
+
+    evtSource.onerror = function() {
+      evtSource.close();
+      spinner.style.display = "none";
+      // Check if audit finished despite connection error
+      fetch(`/audit/${jobId}/report`)
+        .then(r => {
+          if (r.ok) {
+            doneActions.style.display = "block";
+          } else {
+            errorSection.style.display = "block";
+          }
+        })
+        .catch(() => {
+          errorSection.style.display = "block";
+        });
+    };
+  </script>
+</body>
+</html>

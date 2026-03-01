@@ -1,0 +1,122 @@
+/* Report-specific styles */
+.report-container { max-width: 1080px; }
+
+.report-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.report-url { color: var(--color-muted); margin-top: 0.3rem; }
+
+.report-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.report-body {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  box-shadow: var(--shadow);
+}
+
+/* Markdown-rendered content */
+.report-body h1 {
+  font-size: 1.8rem;
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: 0.4rem;
+  margin-bottom: 1.2rem;
+  color: var(--color-text);
+}
+
+.report-body h2 {
+  font-size: 1.35rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.3rem;
+  margin: 2rem 0 1rem;
+}
+
+.report-body h3 {
+  font-size: 1.1rem;
+  margin: 1.5rem 0 0.6rem;
+}
+
+.report-body p {
+  margin: 0.6rem 0;
+  line-height: 1.7;
+}
+
+.report-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.92rem;
+}
+
+.report-body th {
+  background: #f1f5f9;
+  font-weight: 600;
+  text-align: left;
+}
+
+.report-body th, .report-body td {
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
+}
+
+.report-body tr:hover { background: #fafafa; }
+
+.report-body code {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.88em;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+}
+
+.report-body pre {
+  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.report-body pre code {
+  background: none;
+  padding: 0;
+}
+
+.report-body ul, .report-body ol {
+  margin: 0.6rem 0 0.6rem 1.5rem;
+}
+
+.report-body li { margin: 0.3rem 0; }
+
+.report-body hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2rem 0;
+}
+
+.report-body strong { font-weight: 700; }
+
+.report-body a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.report-body a:hover { text-decoration: underline; }
+
+@media (max-width: 600px) {
+  .report-body { padding: 1rem; }
+  .report-header { flex-direction: column; }
+}

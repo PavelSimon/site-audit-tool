@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Site Audit Tool</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔍 Site Audit Tool</h1>
+      <p class="subtitle">Kompletný audit webu: Performance, SEO, Accessibility, Security, GDPR</p>
+    </header>
+
+    <main>
+      <form method="POST" action="/audit/start" class="audit-form">
+        {% if error %}
+        <div class="error-banner">⚠️ {{ error }}</div>
+        {% endif %}
+
+        <div class="input-group">
+          <label for="url">URL webstránky</label>
+          <div class="input-row">
+            <input
+              type="text"
+              id="url"
+              name="url"
+              placeholder="https://example.com"
+              required
+              autocomplete="url"
+              spellcheck="false"
+            >
+            <button type="submit" class="btn-primary">Spustiť audit</button>
+          </div>
+          <small>Zadajte URL vrátane protokolu (https://). Audit trvá ~5–10 minút.</small>
+        </div>
+      </form>
+
+      <section class="phases">
+        <h2>Čo audit zahŕňa</h2>
+        <div class="phase-grid">
+          <div class="phase-card">
+            <span class="phase-icon">🔎</span>
+            <h3>Discovery</h3>
+            <p>DNS, robots.txt, sitemap, tech fingerprinting, TTFB</p>
+          </div>
+          <div class="phase-card">
+            <span class="phase-icon">⚡</span>
+            <h3>Performance</h3>
+            <p>Core Web Vitals (LCP, CLS, FCP), cache, kompresia</p>
+          </div>
+          <div class="phase-card">
+            <span class="phase-icon">📈</span>
+            <h3>SEO</h3>
+            <p>Meta tagy, structured data, broken linky, Open Graph</p>
+          </div>
+          <div class="phase-card">
+            <span class="phase-icon">♿</span>
+            <h3>Accessibility</h3>
+            <p>WCAG 2.1 AA, axe-core, formuláre, klávesnicová navigácia</p>
+          </div>
+          <div class="phase-card">
+            <span class="phase-icon">🔒</span>
+            <h3>Security</h3>
+            <p>TLS/SSL, HTTP headers, cookies, citlivé súbory</p>
+          </div>
+          <div class="phase-card">
+            <span class="phase-icon">🇪🇺</span>
+            <h3>GDPR & Compliance</h3>
+            <p>Cookie consent, Privacy Policy, eCommerce zákon, DSA</p>
+          </div>
+          <div class="phase-card">
+            <span class="phase-icon">📊</span>
+            <h3>Load Test</h3>
+            <p>Locust benchmark: 1/5/20 virtuálnych používateľov</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Výsledky sa exportujú ako <strong>.md</strong> a <strong>.pdf</strong></p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Audit Report — {{ target_url }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/report.css">
+</head>
+<body>
+  <div class="container report-container">
+    <header class="report-header">
+      <div class="report-header-left">
+        <h1>🔍 Audit Report</h1>
+        <p class="report-url"><code>{{ target_url }}</code></p>
+      </div>
+      <div class="report-header-actions">
+        <a href="/audit/{{ job_id }}/download/md" class="btn-secondary">⬇ .md</a>
+        <a href="/audit/{{ job_id }}/download/pdf" class="btn-secondary">⬇ .pdf</a>
+        <a href="/" class="btn-primary">+ Nový audit</a>
+      </div>
+    </header>
+
+    <main class="report-body">
+      {{ report_html | safe }}
+    </main>
+
+    <footer>
+      <a href="/">← Nový audit</a>
+      &nbsp;|&nbsp;
+      <a href="/audit/{{ job_id }}/download/md">Stiahnuť .md</a>
+      &nbsp;|&nbsp;
+      <a href="/audit/{{ job_id }}/download/pdf">Stiahnuť .pdf</a>
+    </footer>
+  </div>
+</body>
+</html>
