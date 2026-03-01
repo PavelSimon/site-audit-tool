@@ -30,9 +30,10 @@ _MOD_ACCESSIBILITY = _load_module("04_accessibility.py")
 _MOD_SECURITY = _load_module("05_security.py")
 _MOD_COMPLIANCE = _load_module("06_compliance.py")
 _MOD_LOAD = _load_module("07_load.py")
+_MOD_GEO = _load_module("08_geo.py")
 _MOD_REPORT = _load_module("report.py")
 
-# (phase_id, label, module) — phase_id matches checkbox values "01"–"07"
+# (phase_id, label, module) — phase_id matches checkbox values "01"–"08"
 _PHASE_DEFS = [
     ("01", "Fáza 1 — Discovery & Reconnaissance",    _MOD_DISCOVERY),
     ("02", "Fáza 2 — Performance Audit",             _MOD_PERFORMANCE),
@@ -41,6 +42,7 @@ _PHASE_DEFS = [
     ("05", "Fáza 5 — Security Audit",                _MOD_SECURITY),
     ("06", "Fáza 6 — GDPR & Compliance",             _MOD_COMPLIANCE),
     ("07", "Fáza 7 — Load Test",                     _MOD_LOAD),
+    ("08", "Fáza 8 — GEO: Generative Engine Optimization", _MOD_GEO),
 ]
 
 _executor = ThreadPoolExecutor(max_workers=2)
@@ -54,7 +56,7 @@ async def run_audit(
     selected_phases: set[str] | None = None,
 ) -> str:
     """
-    Runs all 7 audit phases sequentially + report generation.
+    Runs all 8 audit phases sequentially + report generation.
     Calls progress_callback(sse_message) after each phase.
     Returns the final Markdown report as a string.
     """

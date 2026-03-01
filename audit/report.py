@@ -223,6 +223,49 @@ def score_compliance(d6: dict) -> Score:
     return s
 
 
+def score_geo(d8: dict) -> Score:
+    s = Score("GEO (Generative Engine Optimization)")
+    crawlers = d8.get("ai_crawler_access", {}).get("crawlers", {})
+
+    # AI crawler prístup (20 bodov)
+    s.add("GPTBot má prístup (OpenAI)", crawlers.get("GPTBot", {}).get("allowed", True), 10,
+          "blokovaný" if not crawlers.get("GPTBot", {}).get("allowed", True) else "")
+    s.add("Google-Extended má prístup (Google AI)", crawlers.get("Google-Extended", {}).get("allowed", True), 10,
+          "blokovaný" if not crawlers.get("Google-Extended", {}).get("allowed", True) else "")
+
+    # Štruktúrované dáta JSON-LD (35 bodov)
+    pages = d8.get("pages", [])
+    homepage = next((p for p in pages if p.get("label") == "Homepage"), pages[0] if pages else {})
+    structured_data = homepage.get("structured_data", {}) if "error" not in homepage else {}
+
+    s.add("FAQPage alebo HowTo schema",
+          structured_data.get("has_faq_schema") or structured_data.get("has_howto_schema"), 15)
+    s.add("Article schema s autorom a dátumom",
+          bool(structured_data.get("article_has_author") and structured_data.get("article_has_dates")), 10)
+    s.add("Organization schema so sameAs odkazmi",
+          bool(structured_data.get("organization_has_same_as")), 5)
+    s.add("WebSite schema", bool(structured_data.get("has_website_schema")), 5)
+
+    # E-E-A-T signály (25 bodov)
+    eeat = homepage.get("eeat_signals", {})
+    s.add("Informácie o autorovi (byline/itemprop)", bool(eeat.get("has_author_info")), 10)
+    s.add("Dátumové signály na stránke (time/datePublished)", bool(eeat.get("has_date_signals")), 5)
+    s.add("About / O nás stránka odkazovaná", bool(eeat.get("has_about_link")), 5)
+    s.add("Externé citačné linky", bool(eeat.get("has_external_citations")), 5)
+
+    # Štruktúra obsahu pre AI (20 bodov)
+    content_structure = homepage.get("content_structure", {})
+    semantic_elements = content_structure.get("semantic_elements", {})
+    s.add("Práve 1× H1 (jasný názov stránky)", bool(content_structure.get("has_single_h1")), 5)
+    s.add("FAQ-like nadpisy s otázkami (H2/H3 s ?)",
+          bool(content_structure.get("has_faq_like_structure")), 5)
+    s.add("Sémantické HTML5 elementy (article alebo main)",
+          bool(semantic_elements.get("article") or semantic_elements.get("main")), 5)
+    s.add("Dostatočný obsah (≥ 300 slov)", bool(content_structure.get("has_substantial_content")), 5)
+
+    return s
+
+
 def score_load(d7: dict) -> Score:
     s = Score("Load Test")
     scenarios = d7.get("scenarios", [])
@@ -257,7 +300,7 @@ def finding(priority: str, category: str, title: str, detail: str = ""):
                      "title": title, "detail": detail})
 
 
-def collect_findings(d1, d2, d3, d4, d5, d6, d7):
+def collect_findings(d1, d2, d3, d4, d5, d6, d7, d8=None):
     # Infra
     if not d1.get("robots", {}).get("status_code") == 200:
         finding("kritické", "SEO / Infra", "Chýba robots.txt",
@@ -392,12 +435,57 @@ def collect_findings(d1, d2, d3, d4, d5, d6, d7):
         finding("kritické", "Compliance / DSA", "Chýbajú Podmienky používania (ToS)",
                 "DSA (EÚ 2022/2065) vyžaduje zverejnenie ToS pre každú online platformu.")
 
+    # GEO
+    if not d8:
+        return
+    geo_crawlers = d8.get("ai_crawler_access", {}).get("crawlers", {})
+    blocked_major_crawlers = [
+        crawler_name for crawler_name in ["GPTBot", "Google-Extended"]
+        if not geo_crawlers.get(crawler_name, {}).get("allowed", True)
+    ]
+    if blocked_major_crawlers:
+        finding("kritické", "GEO",
+                f"AI crawleri blokovaní v robots.txt: {', '.join(blocked_major_crawlers)}",
+                "Pridať explicitné povolenie: User-agent: GPTBot / Google-Extended + prázdne Disallow:")
+
+    geo_pages = d8.get("pages", [])
+    geo_homepage = next(
+        (p for p in geo_pages if p.get("label") == "Homepage"), geo_pages[0] if geo_pages else {}
+    )
+    if "error" in geo_homepage:
+        return
+
+    geo_sd = geo_homepage.get("structured_data", {})
+    geo_eeat = geo_homepage.get("eeat_signals", {})
+    geo_cs = geo_homepage.get("content_structure", {})
+
+    if not geo_sd.get("has_faq_schema") and not geo_sd.get("has_howto_schema"):
+        finding("stredné", "GEO", "Chýba FAQPage alebo HowTo JSON-LD schema",
+                "FAQPage schema zvyšuje šancu citovania v AI odpovediach a Google AI Overviews.")
+    if geo_sd.get("has_article_schema") and not (
+        geo_sd.get("article_has_author") and geo_sd.get("article_has_dates")
+    ):
+        finding("stredné", "GEO", "Article schema chýba autor alebo dátum publikácie",
+                "Doplniť 'author' a 'datePublished' do Article schema pre E-E-A-T signály.")
+    if not geo_sd.get("organization_has_same_as"):
+        finding("nízke", "GEO", "Organization schema nemá sameAs sociálne profily",
+                "Pridať 'sameAs' s URL LinkedIn, Twitter/X, Facebook — posilňuje entitný graf.")
+    if not geo_eeat.get("has_author_info"):
+        finding("stredné", "GEO", "Chýbajú informácie o autorovi (byline)",
+                "AI vyhľadávače uprednostňujú obsah s identifikovaným autorom (E-E-A-T).")
+    if not geo_eeat.get("has_about_link"):
+        finding("nízke", "GEO", "Chýba odkaz na About / O nás stránku",
+                "About stránka s povereniami tímu posilňuje Trustworthiness signál.")
+    if not geo_cs.get("has_faq_like_structure"):
+        finding("nízke", "GEO", "Žiadne FAQ-like nadpisy (otázky v H2/H3)",
+                "Nadpisy vo forme otázok zvyšujú šancu citovania v AI odpovediach.")
+
 
 # ---------------------------------------------------------------------------
 # Dynamic phase summaries (generated from data, not hardcoded)
 # ---------------------------------------------------------------------------
 
-def build_phase_summaries(target_url: str, d1, d2, d3, d4, d5, d6, d7) -> list[str]:
+def build_phase_summaries(target_url: str, d1, d2, d3, d4, d5, d6, d7, d8=None) -> list[str]:
     lines = []
 
     # Phase 1 — Discovery
@@ -565,6 +653,50 @@ def build_phase_summaries(target_url: str, d1, d2, d3, d4, d5, d6, d7) -> list[s
         lines.append("- Dáta nie sú k dispozícii")
     lines.append("")
 
+    # Phase 8 — GEO
+    lines.append("### Fáza 8 — GEO: Generative Engine Optimization")
+    if d8:
+        geo_crawlers = d8.get("ai_crawler_access", {}).get("crawlers", {})
+        gptbot_allowed = geo_crawlers.get("GPTBot", {}).get("allowed", True)
+        google_ext_allowed = geo_crawlers.get("Google-Extended", {}).get("allowed", True)
+        perplexity_allowed = geo_crawlers.get("PerplexityBot", {}).get("allowed", True)
+        blocked_count = d8.get("ai_crawler_access", {}).get("blocked_count", 0)
+
+        lines.append(f"- AI crawleri: GPTBot={'✅' if gptbot_allowed else '❌ blokovaný'} | "
+                     f"Google-Extended={'✅' if google_ext_allowed else '❌ blokovaný'} | "
+                     f"PerplexityBot={'✅' if perplexity_allowed else '❌ blokovaný'} "
+                     f"({blocked_count}/10 blokovaných)")
+
+        geo_pages = d8.get("pages", [])
+        geo_hp = next(
+            (p for p in geo_pages if p.get("label") == "Homepage"),
+            geo_pages[0] if geo_pages else {}
+        )
+        if "error" not in geo_hp:
+            geo_sd = geo_hp.get("structured_data", {})
+            geo_eeat = geo_hp.get("eeat_signals", {})
+            geo_cs = geo_hp.get("content_structure", {})
+
+            lines.append(f"- JSON-LD schémy: {geo_sd.get('total_schemas', 0)} celkom | "
+                         f"FAQPage: {'✅' if geo_sd.get('has_faq_schema') else '❌'} | "
+                         f"HowTo: {'✅' if geo_sd.get('has_howto_schema') else '❌'} | "
+                         f"Organization: {'✅' if geo_sd.get('has_organization_schema') else '❌'}")
+            if geo_sd.get("has_article_schema"):
+                lines.append(f"- Article schema: autor={'✅' if geo_sd.get('article_has_author') else '❌'} | "
+                             f"dátum={'✅' if geo_sd.get('article_has_dates') else '❌'}")
+            lines.append(f"- E-E-A-T: autor={'✅' if geo_eeat.get('has_author_info') else '❌'} | "
+                         f"dátumy={'✅' if geo_eeat.get('has_date_signals') else '❌'} | "
+                         f"About stránka={'✅' if geo_eeat.get('has_about_link') else '❌'} | "
+                         f"ext. citácie={geo_eeat.get('external_citation_count', 0)}")
+            lines.append(f"- Obsah: {geo_cs.get('word_count', 0)} slov | "
+                         f"FAQ nadpisy: {geo_cs.get('headings_with_questions', 0)} | "
+                         f"Sémantické elementy: {geo_cs.get('semantic_score', 0)}/7")
+        else:
+            lines.append("- Dáta nie sú k dispozícii (chyba pri analýze)")
+    else:
+        lines.append("- Fáza nebola spustená")
+    lines.append("")
+
     return lines
 
 
@@ -669,7 +801,7 @@ def generate_report(target_url: str, scores: list[Score],
 # ---------------------------------------------------------------------------
 
 def main(target_url: str, results_dir: Path) -> str:
-    console.rule("[bold]Fáza 8 — Generujem súhrnný report")
+    console.rule("[bold]Generujem súhrnný report")
 
     d1 = load(results_dir, "01_discovery.json")
     d2 = load(results_dir, "02_performance.json")
@@ -678,6 +810,7 @@ def main(target_url: str, results_dir: Path) -> str:
     d5 = load(results_dir, "05_security.json")
     d6 = load(results_dir, "06_compliance.json")
     d7 = load(results_dir, "07_load.json")
+    d8 = load(results_dir, "08_geo.json")
 
     scores = [
         score_infrastructure(d1),
@@ -687,11 +820,12 @@ def main(target_url: str, results_dir: Path) -> str:
         score_security(d5),
         score_compliance(d6),
         score_load(d7),
+        score_geo(d8),
     ]
 
     FINDINGS.clear()
-    collect_findings(d1, d2, d3, d4, d5, d6, d7)
-    phase_summaries = build_phase_summaries(target_url, d1, d2, d3, d4, d5, d6, d7)
+    collect_findings(d1, d2, d3, d4, d5, d6, d7, d8)
+    phase_summaries = build_phase_summaries(target_url, d1, d2, d3, d4, d5, d6, d7, d8)
 
     t = Table("Oblasť", "Skóre %", "Body", "Hodnotenie")
     for sc in scores:

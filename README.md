@@ -6,6 +6,8 @@ Použitie bez záruky kompletnosti a bez akejkoľvek zodpovednosti autora. Nevyu
 
 Funguje ako **web aplikácia** — zadáte URL, audit beží na pozadí, výsledky sa zobrazia v prehliadači a dajú sa exportovať ako `.md` alebo `.pdf`.
 
+Obsahuje aj analýzu **GEO (Generative Engine Optimization)** — pripravenosť pre AI vyhľadávače ako ChatGPT, Perplexity a Google AI Overviews.
+
 ## Čo audit meria
 
 | Fáza | Čo | Nástroje |
@@ -17,6 +19,7 @@ Funguje ako **web aplikácia** — zadáte URL, audit beží na pozadí, výsled
 | 5 Security | TLS/SSL, HTTP security headers, citlivé súbory, cookies | sslyze, httpx |
 | 6 GDPR & Compliance | Cookie consent, Privacy Policy, eCommerce zákon, DSA, trackery | Playwright |
 | 7 Load Test | Benchmark: 1/5/20 VU, p50/p95/p99 | Locust |
+| 8 GEO | AI crawler prístup, E-E-A-T signály, JSON-LD bohatosť, FAQ štruktúra | httpx, Playwright, BeautifulSoup |
 
 ## Inštalácia
 
@@ -65,6 +68,7 @@ site-audit-tool/
 │   ├── 05_security.py      # TLS, headers, cookies, citlivé súbory
 │   ├── 06_compliance.py    # GDPR, cookie consent, eCommerce, DSA
 │   ├── 07_load.py          # Locust load test
+│   ├── 08_geo.py           # GEO: Generative Engine Optimization
 │   └── report.py           # Scoring + Markdown report generátor
 ├── web/
 │   ├── app.py              # FastAPI aplikácia
@@ -83,7 +87,7 @@ site-audit-tool/
 
 ## Je potrebná AI?
 
-**Nie pre základný audit.** Všetkých 7 fáz je deterministických — rule-based kontroly bez AI.
+**Nie pre základný audit.** Všetkých 8 fáz je deterministických — rule-based kontroly bez AI.
 
 AI by pridala hodnotu pre:
 - Generovanie naratívnych súhrnov v prirodzenom jazyku (voliteľné)
