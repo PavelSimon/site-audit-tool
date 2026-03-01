@@ -33,55 +33,153 @@
             >
             <button type="submit" class="btn-primary">Spustiť audit</button>
           </div>
-          <small>Zadajte URL vrátane protokolu (https://). Audit trvá ~5–10 minút.</small>
+          <small>Audit trvá ~5–10 minút. Vyberte fázy nižšie.</small>
         </div>
-      </form>
 
-      <section class="phases">
-        <h2>Čo audit zahŕňa</h2>
-        <div class="phase-grid">
-          <div class="phase-card">
-            <span class="phase-icon">🔎</span>
-            <h3>Discovery</h3>
-            <p>DNS, robots.txt, sitemap, tech fingerprinting, TTFB</p>
+        <section class="phases">
+          <div class="phases-header">
+            <h2>Čo audit zahŕňa</h2>
+            <div class="phases-toggle">
+              <button type="button" id="btn-all" class="btn-toggle active" onclick="setAll(true)">Vybrať všetko</button>
+              <button type="button" id="btn-none" class="btn-toggle" onclick="setAll(false)">Zrušiť všetko</button>
+            </div>
           </div>
-          <div class="phase-card">
-            <span class="phase-icon">⚡</span>
-            <h3>Performance</h3>
-            <p>Core Web Vitals (LCP, CLS, FCP), cache, kompresia</p>
+
+          <div class="phase-grid">
+
+            <label class="phase-card" for="phase-01">
+              <input type="checkbox" id="phase-01" name="phases" value="01" checked>
+              <div class="phase-card-inner">
+                <div class="phase-card-top">
+                  <span class="phase-icon">🔎</span>
+                  <span class="phase-check-icon">✓</span>
+                </div>
+                <h3>Discovery</h3>
+                <p>DNS, robots.txt, sitemap, tech fingerprinting, TTFB</p>
+              </div>
+            </label>
+
+            <label class="phase-card" for="phase-02">
+              <input type="checkbox" id="phase-02" name="phases" value="02" checked>
+              <div class="phase-card-inner">
+                <div class="phase-card-top">
+                  <span class="phase-icon">⚡</span>
+                  <span class="phase-check-icon">✓</span>
+                </div>
+                <h3>Performance</h3>
+                <p>Core Web Vitals (LCP, CLS, FCP), cache, kompresia</p>
+              </div>
+            </label>
+
+            <label class="phase-card" for="phase-03">
+              <input type="checkbox" id="phase-03" name="phases" value="03" checked>
+              <div class="phase-card-inner">
+                <div class="phase-card-top">
+                  <span class="phase-icon">📈</span>
+                  <span class="phase-check-icon">✓</span>
+                </div>
+                <h3>SEO</h3>
+                <p>Meta tagy, structured data, broken linky, Open Graph</p>
+              </div>
+            </label>
+
+            <label class="phase-card" for="phase-04">
+              <input type="checkbox" id="phase-04" name="phases" value="04" checked>
+              <div class="phase-card-inner">
+                <div class="phase-card-top">
+                  <span class="phase-icon">♿</span>
+                  <span class="phase-check-icon">✓</span>
+                </div>
+                <h3>Accessibility</h3>
+                <p>WCAG 2.1 AA, axe-core, formuláre, klávesnicová navigácia</p>
+              </div>
+            </label>
+
+            <label class="phase-card" for="phase-05">
+              <input type="checkbox" id="phase-05" name="phases" value="05" checked>
+              <div class="phase-card-inner">
+                <div class="phase-card-top">
+                  <span class="phase-icon">🔒</span>
+                  <span class="phase-check-icon">✓</span>
+                </div>
+                <h3>Security</h3>
+                <p>TLS/SSL, HTTP headers, cookies, citlivé súbory</p>
+              </div>
+            </label>
+
+            <label class="phase-card" for="phase-06">
+              <input type="checkbox" id="phase-06" name="phases" value="06" checked>
+              <div class="phase-card-inner">
+                <div class="phase-card-top">
+                  <span class="phase-icon">🇪🇺</span>
+                  <span class="phase-check-icon">✓</span>
+                </div>
+                <h3>GDPR & Compliance</h3>
+                <p>Cookie consent, Privacy Policy, eCommerce zákon, DSA</p>
+              </div>
+            </label>
+
+            <label class="phase-card" for="phase-07">
+              <input type="checkbox" id="phase-07" name="phases" value="07" checked>
+              <div class="phase-card-inner">
+                <div class="phase-card-top">
+                  <span class="phase-icon">📊</span>
+                  <span class="phase-check-icon">✓</span>
+                </div>
+                <h3>Load Test</h3>
+                <p>Locust benchmark: 1/5/20 virtuálnych používateľov</p>
+              </div>
+            </label>
+
           </div>
-          <div class="phase-card">
-            <span class="phase-icon">📈</span>
-            <h3>SEO</h3>
-            <p>Meta tagy, structured data, broken linky, Open Graph</p>
-          </div>
-          <div class="phase-card">
-            <span class="phase-icon">♿</span>
-            <h3>Accessibility</h3>
-            <p>WCAG 2.1 AA, axe-core, formuláre, klávesnicová navigácia</p>
-          </div>
-          <div class="phase-card">
-            <span class="phase-icon">🔒</span>
-            <h3>Security</h3>
-            <p>TLS/SSL, HTTP headers, cookies, citlivé súbory</p>
-          </div>
-          <div class="phase-card">
-            <span class="phase-icon">🇪🇺</span>
-            <h3>GDPR & Compliance</h3>
-            <p>Cookie consent, Privacy Policy, eCommerce zákon, DSA</p>
-          </div>
-          <div class="phase-card">
-            <span class="phase-icon">📊</span>
-            <h3>Load Test</h3>
-            <p>Locust benchmark: 1/5/20 virtuálnych používateľov</p>
-          </div>
-        </div>
-      </section>
+        </section>
+      </form>
     </main>
 
     <footer>
       <p>Výsledky sa exportujú ako <strong>.md</strong> a <strong>.pdf</strong></p>
     </footer>
   </div>
+
+  <script>
+    function syncCardClass(checkbox) {
+      checkbox.closest('.phase-card').classList.toggle('is-checked', checkbox.checked);
+    }
+
+    function setAll(checked) {
+      document.querySelectorAll('.phase-card input[type="checkbox"]').forEach(cb => {
+        cb.checked = checked;
+        syncCardClass(cb);
+      });
+      updateToggleButtons();
+    }
+
+    function updateToggleButtons() {
+      const checkboxes = [...document.querySelectorAll('.phase-card input[type="checkbox"]')];
+      const checkedCount = checkboxes.filter(cb => cb.checked).length;
+      document.getElementById('btn-all').classList.toggle('active', checkedCount === checkboxes.length);
+      document.getElementById('btn-none').classList.toggle('active', checkedCount === 0);
+    }
+
+    // Init: sync classes for all checkboxes (all start checked)
+    document.querySelectorAll('.phase-card input[type="checkbox"]').forEach(cb => {
+      syncCardClass(cb);
+      cb.addEventListener('change', () => {
+        syncCardClass(cb);
+        updateToggleButtons();
+      });
+    });
+
+    updateToggleButtons();
+
+    // Prevent form submit if no phases selected
+    document.querySelector('.audit-form').addEventListener('submit', function(e) {
+      const anyChecked = [...document.querySelectorAll('.phase-card input[type="checkbox"]')].some(cb => cb.checked);
+      if (!anyChecked) {
+        e.preventDefault();
+        alert('Vyberte aspoň jednu fázu auditu.');
+      }
+    });
+  </script>
 </body>
 </html>

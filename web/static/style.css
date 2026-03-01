@@ -148,10 +148,46 @@ header h1 {
 /* =====================
    Phase cards
    ===================== */
-.phases h2 {
+.phases {
+  margin-top: 2rem;
+}
+
+.phases-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.phases-header h2 {
   font-size: 1.3rem;
-  margin-bottom: 1.2rem;
   font-weight: 600;
+  margin: 0;
+}
+
+.phases-toggle {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.btn-toggle {
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-toggle.active,
+.btn-toggle:hover {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
 }
 
 .phase-grid {
@@ -160,15 +196,89 @@ header h1 {
   gap: 1rem;
 }
 
+/* phase-card is a <label> wrapping a hidden checkbox */
 .phase-card {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: opacity 0.15s, box-shadow 0.15s;
+}
+
+.phase-card input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.phase-card-inner {
   background: var(--color-card);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-primary);
   border-radius: var(--radius);
   padding: 1.2rem;
   box-shadow: var(--shadow);
+  height: 100%;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  user-select: none;
 }
 
-.phase-icon { font-size: 1.6rem; display: block; margin-bottom: 0.5rem; }
+/* Checked state — driven by .is-checked class on .phase-card (set via JS) */
+.phase-card.is-checked .phase-card-inner {
+  border-color: var(--color-primary);
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12), var(--shadow);
+}
+
+/* Unchecked state */
+.phase-card:not(.is-checked) .phase-card-inner {
+  border-color: var(--color-border);
+  background: var(--color-card);
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.phase-card:hover .phase-card-inner {
+  opacity: 1;
+  box-shadow: var(--shadow-md);
+}
+
+.phase-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.phase-icon { font-size: 1.6rem; }
+
+.phase-check-icon {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+/* check icon visibility driven by .is-checked class on .phase-card (set via JS) */
+.phase-card:not(.is-checked) .phase-check-icon {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.phase-card.is-checked .phase-check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
 
 .phase-card h3 {
   font-size: 1rem;

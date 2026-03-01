@@ -32,14 +32,15 @@ _MOD_COMPLIANCE = _load_module("06_compliance.py")
 _MOD_LOAD = _load_module("07_load.py")
 _MOD_REPORT = _load_module("report.py")
 
-PHASES = [
-    ("Fáza 1 — Discovery & Reconnaissance",    _MOD_DISCOVERY),
-    ("Fáza 2 — Performance Audit",             _MOD_PERFORMANCE),
-    ("Fáza 3 — SEO Audit",                     _MOD_SEO),
-    ("Fáza 4 — Accessibility (WCAG 2.1 AA)",   _MOD_ACCESSIBILITY),
-    ("Fáza 5 — Security Audit",                _MOD_SECURITY),
-    ("Fáza 6 — GDPR & Compliance",             _MOD_COMPLIANCE),
-    ("Fáza 7 — Load Test",                     _MOD_LOAD),
+# (phase_id, label, module) — phase_id matches checkbox values "01"–"07"
+_PHASE_DEFS = [
+    ("01", "Fáza 1 — Discovery & Reconnaissance",    _MOD_DISCOVERY),
+    ("02", "Fáza 2 — Performance Audit",             _MOD_PERFORMANCE),
+    ("03", "Fáza 3 — SEO Audit",                     _MOD_SEO),
+    ("04", "Fáza 4 — Accessibility (WCAG 2.1 AA)",   _MOD_ACCESSIBILITY),
+    ("05", "Fáza 5 — Security Audit",                _MOD_SECURITY),
+    ("06", "Fáza 6 — GDPR & Compliance",             _MOD_COMPLIANCE),
+    ("07", "Fáza 7 — Load Test",                     _MOD_LOAD),
 ]
 
 _executor = ThreadPoolExecutor(max_workers=2)
@@ -50,6 +51,7 @@ async def run_audit(
     target_url: str,
     results_dir: Path,
     progress_callback: Callable[[str], None],
+    selected_phases: set[str] | None = None,
 ) -> str:
     """
     Runs all 7 audit phases sequentially + report generation.
@@ -57,9 +59,12 @@ async def run_audit(
     Returns the final Markdown report as a string.
     """
     loop = asyncio.get_event_loop()
-    total = len(PHASES) + 1  # +1 for report
+    active_phases = selected_phases or {num for num, _, _ in [(p[0], p[1], p[2]) for p in _PHASE_DEFS]}
+    active_phase_list = [(num, label, mod) for num, label, mod in _PHASE_DEFS
+                         if num in active_phases]
+    total = len(active_phase_list) + 1  # +1 for report
 
-    for step_index, (label, module) in enumerate(PHASES, 1):
+    for step_index, (phase_num, label, module) in enumerate(active_phase_list, 1):
         progress_callback(f"data: [{step_index}/{total}] {label}\n\n")
         try:
             await loop.run_in_executor(

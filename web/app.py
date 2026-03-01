@@ -51,8 +51,15 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+ALL_PHASE_IDS = {"01", "02", "03", "04", "05", "06", "07"}
+
+
 @app.post("/audit/start")
-async def start_audit(request: Request, url: str = Form(...)):
+async def start_audit(request: Request):
+    form_data = await request.form()
+    url = form_data.get("url", "")
+    selected_phases = set(form_data.getlist("phases")) or ALL_PHASE_IDS
+
     try:
         clean_url = _validate_url(url)
     except ValueError as exc:
@@ -66,16 +73,24 @@ async def start_audit(request: Request, url: str = Form(...)):
     job_results_dir = RESULTS_DIR / job_id
     job_results_dir.mkdir(parents=True, exist_ok=True)
 
-    _jobs[job_id] = {"url": clean_url, "status": "running", "report_md": None}
+    _jobs[job_id] = {
+        "url": clean_url,
+        "status": "running",
+        "report_md": None,
+        "selected_phases": sorted(selected_phases),
+    }
     _sse_queues[job_id] = asyncio.Queue()
 
-    # Start audit in background
-    asyncio.create_task(_run_audit_background(job_id, clean_url, job_results_dir))
+    asyncio.create_task(
+        _run_audit_background(job_id, clean_url, job_results_dir, selected_phases)
+    )
 
     return RedirectResponse(f"/audit/{job_id}", status_code=303)
 
 
-async def _run_audit_background(job_id: str, target_url: str, results_dir: Path):
+async def _run_audit_background(
+    job_id: str, target_url: str, results_dir: Path, selected_phases: set[str]
+):
     """Background task that runs the audit and pushes SSE events."""
     from web.runner import run_audit
 
@@ -86,7 +101,9 @@ async def _run_audit_background(job_id: str, target_url: str, results_dir: Path)
             asyncio.get_event_loop().call_soon_threadsafe(queue.put_nowait, message)
 
     try:
-        report_md = await run_audit(job_id, target_url, results_dir, progress_callback)
+        report_md = await run_audit(
+            job_id, target_url, results_dir, progress_callback, selected_phases
+        )
         _jobs[job_id]["report_md"] = report_md
         _jobs[job_id]["status"] = "done"
     except Exception as exc:
@@ -107,6 +124,7 @@ async def audit_page(request: Request, job_id: str):
         "job_id": job_id,
         "target_url": job["url"],
         "status": job["status"],
+        "selected_phases": job.get("selected_phases", []),
     })
 
 
