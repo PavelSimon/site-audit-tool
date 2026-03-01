@@ -88,7 +88,7 @@ async def sitemap(request: Request):
     return Response(content=xml, media_type="application/xml")
 
 
-ALL_PHASE_IDS = {"01", "02", "03", "04", "05", "06", "07"}
+ALL_PHASE_IDS = {"01", "02", "03", "04", "05", "06", "07", "08"}
 
 
 @app.post("/audit/start")
