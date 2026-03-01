@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/static/report.css">
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Preskočiť na obsah</a>
   <div class="container report-container">
     <header class="report-header">
       <div class="report-header-left">
@@ -21,7 +22,7 @@
       </div>
     </header>
 
-    <main class="report-body">
+    <main id="main-content" class="report-body">
       {{ report_html | safe }}
     </main>
 

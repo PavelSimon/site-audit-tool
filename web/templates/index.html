@@ -3,17 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Site Audit Tool</title>
+  <title>Site Audit Tool — automatický audit webu: SEO, Performance, GDPR</title>
+  <meta name="description" content="Automatický audit webu: Core Web Vitals, SEO, WCAG prístupnosť, bezpečnosť a GDPR compliance. Výsledky ako .md a .pdf.">
+  <link rel="canonical" href="{{ request.url }}">
+  <meta property="og:title" content="Site Audit Tool">
+  <meta property="og:description" content="Automatický audit webu: Core Web Vitals, SEO, WCAG prístupnosť, bezpečnosť a GDPR compliance.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/static/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Site Audit Tool">
+  <meta name="twitter:description" content="Automatický audit webu: Core Web Vitals, SEO, WCAG prístupnosť, bezpečnosť a GDPR compliance.">
   <link rel="stylesheet" href="/static/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Site Audit Tool",
+    "description": "Automatický audit webu: Core Web Vitals, SEO, WCAG prístupnosť, bezpečnosť a GDPR compliance.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any"
+  }
+  </script>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Preskočiť na obsah</a>
   <div class="container">
     <header>
       <h1>🔍 Site Audit Tool</h1>
       <p class="subtitle">Kompletný audit webu: Performance, SEO, Accessibility, Security, GDPR</p>
     </header>
 
-    <main>
+    <main id="main-content">
       <form method="POST" action="/audit/start" class="audit-form">
         {% if error %}
         <div class="error-banner">⚠️ {{ error }}</div>

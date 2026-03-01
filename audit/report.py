@@ -551,8 +551,11 @@ def build_phase_summaries(target_url: str, d1, d2, d3, d4, d5, d6, d7) -> list[s
         for sc in scenarios:
             agg = sc.get("aggregated") or {}
             name = sc["scenario"]["name"]
-            p95 = agg.get("p95_ms", 0)
-            err = agg.get("failure_rate_pct", 0)
+            if not agg:
+                lines.append(f"- {name} ({sc['scenario']['users']} VU): N/A — Locust nenazbierkal dáta")
+                continue
+            p95 = agg.get("p95_ms", 9999)
+            err = agg.get("failure_rate_pct", 100)
             p95_mark = "✅" if p95 < 1000 else ("⚠️" if p95 < 3000 else "❌")
             lines.append(f"- {name} ({sc['scenario']['users']} VU): "
                          f"p50={agg.get('median_ms', 0):.0f}ms, "

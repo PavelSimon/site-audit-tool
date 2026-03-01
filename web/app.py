@@ -9,11 +9,33 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, Response, StreamingResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 
 app = FastAPI(title="Site Audit Tool")
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; style-src 'self' 'unsafe-inline'; "
+            "script-src 'self' 'unsafe-inline'; connect-src 'self'"
+        )
+        if request.url.path.startswith("/static/"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 BASE_DIR = Path(__file__).parent
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -49,6 +71,21 @@ def _validate_url(url: str) -> str:
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+async def robots():
+    return "User-agent: *\nDisallow: /audit/\nSitemap: /sitemap.xml\n"
+
+
+@app.get("/sitemap.xml")
+async def sitemap(request: Request):
+    base = str(request.base_url).rstrip("/")
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>{base}/</loc></url>
+</urlset>"""
+    return Response(content=xml, media_type="application/xml")
 
 
 ALL_PHASE_IDS = {"01", "02", "03", "04", "05", "06", "07"}
